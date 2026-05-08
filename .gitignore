@@ -1,0 +1,45 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Local environments
+.venv/
+venv/
+env/
+
+# CUDA / build artifacts
+*.so
+*.o
+*.obj
+*.dll
+*.exe
+build/
+dist/
+
+# Nsight / profiling binaries
+*.nsys-rep
+*.qdrep
+*.sqlite
+
+# Large model or engine artifacts
+*.engine
+*.plan
+*.onnx
+*.pt
+*.pth
+*.safetensors
+
+# Secrets / local machine state
+*.pem
+*.key
+id_rsa
+id_ed25519
+known_hosts
+.env
+ssh_config*
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
