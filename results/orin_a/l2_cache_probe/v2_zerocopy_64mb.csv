@@ -1,0 +1,17 @@
+==PROF== Connected to process 13675 (/home2/sangjin_work/slc_bench/l2_bench_v2)
+mode=zerocopy mb=64 n=16777216
+==PROF== Disconnected from process 13675
+==PROF== Connected to process 13766 (/home2/sangjin_work/slc_bench/l2_bench_v2)
+mode=zerocopy mb=64 n=16777216
+==PROF== Disconnected from process 13766
+==PROF== Connected to process 13776 (/home2/sangjin_work/slc_bench/l2_bench_v2)
+mode=zerocopy mb=64 n=16777216
+==PROF== Disconnected from process 13776
+==PROF== Creating report from application replay data: 0%.....100%
+"ID","Process ID","Process Name","Host Name","Kernel Name","Context","Stream","Block Size","Grid Size","Device","CC","Section Name","Metric Name","Metric Unit","Metric Value"
+"0","13675","l2_bench_v2","127.0.0.1","read_kernel(const float *, float *, int, int)","1","7","(256, 1, 1)","(65536, 1, 1)","0","8.7","Command line profiler metrics","dram__bytes_read.sum","","n/a"
+"0","13675","l2_bench_v2","127.0.0.1","read_kernel(const float *, float *, int, int)","1","7","(256, 1, 1)","(65536, 1, 1)","0","8.7","Command line profiler metrics","dram__bytes_write.sum","","n/a"
+"0","13675","l2_bench_v2","127.0.0.1","read_kernel(const float *, float *, int, int)","1","7","(256, 1, 1)","(65536, 1, 1)","0","8.7","Command line profiler metrics","gpu__time_duration.sum","ns","34,223,648"
+"0","13675","l2_bench_v2","127.0.0.1","read_kernel(const float *, float *, int, int)","1","7","(256, 1, 1)","(65536, 1, 1)","0","8.7","Command line profiler metrics","lts__t_sector_hit_rate.pct","%","5.88"
+"0","13675","l2_bench_v2","127.0.0.1","read_kernel(const float *, float *, int, int)","1","7","(256, 1, 1)","(65536, 1, 1)","0","8.7","Command line profiler metrics","lts__t_sectors.sum","sector","35,655,173"
+"0","13675","l2_bench_v2","127.0.0.1","read_kernel(const float *, float *, int, int)","1","7","(256, 1, 1)","(65536, 1, 1)","0","8.7","Command line profiler metrics","lts__t_sectors_op_read.sum","sector","33,557,688"

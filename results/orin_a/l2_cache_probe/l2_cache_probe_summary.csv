@@ -1,0 +1,5 @@
+condition,mode,working_set_mb,l2_hit_pct,l2_sectors,l2_read_sectors,duration_us,dram_read,dram_write
+device 1MB,device,1,94.17,562205,529104,547.328,n/a,n/a
+zerocopy 1MB,zerocopy,1,5.94,560733,527632,382.976,n/a,n/a
+device 64MB,device,64,94.12,35656901,33559416,33999.136,n/a,n/a
+zerocopy 64MB,zerocopy,64,5.88,35655173,33557688,34223.648,n/a,n/a
