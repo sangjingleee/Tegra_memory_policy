@@ -1,0 +1,9 @@
+green_spatter_split
+cublas_gemm_split
+query_sm_count
+spatter_gather.ptx
+*.o
+*.nsys-rep
+*.ncu-rep
+raw_*
+
