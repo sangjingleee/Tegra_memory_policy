@@ -1,0 +1,33 @@
+hostname=localhost.localdomain
+2026-07-21T16:06:30+09:00
+Linux localhost.localdomain 6.8.12-1021-tegra #1 SMP PREEMPT Mon Jun  1 13:25:46 PDT 2026 aarch64 aarch64 aarch64 GNU/Linux
+# R39 (release), REVISION: 2.0, GCID: 45755727, BOARD: generic, EABI: aarch64, DATE: Mon Jun  1 09:28:48 PM UTC 2026
+# KERNEL_VARIANT: oot
+TARGET_USERSPACE_LIB_DIR=nvidia
+TARGET_USERSPACE_LIB_DIR_PATH=usr/lib/aarch64-linux-gnu/nvidia
+nvcc: NVIDIA (R) Cuda compiler driver
+Copyright (c) 2005-2026 NVIDIA Corporation
+Built on Thu_Mar_19_11:11:41_PM_PDT_2026
+Cuda compilation tools, release 13.2, V13.2.78
+Build cuda_13.2.r13.2/compiler.37668154_0
+Tue Jul 21 16:06:30 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 595.78                 Driver Version: 595.78         CUDA Version: 13.2     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  Orin (nvgpu)                  N/A  |   N/A              N/A |                  N/A |
+| N/A   N/A  N/A             N/A  /  N/A  | Not Supported          |     N/A          N/A |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+torch unavailable: No module named 'torch'
