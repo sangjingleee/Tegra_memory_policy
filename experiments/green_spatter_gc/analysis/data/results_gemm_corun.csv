@@ -1,0 +1,5 @@
+kernel,N,batch,dev_sms,zc_sms,dev_solo_gflops,zc_solo_gflops,dev_co_gflops,zc_co_gflops,solo_sum,co_sum,efficiency_pct,overlap
+cublas_sgemm,512,4,8,8,1491,1410,1395,1325,2901,2720,93.73,0.990
+cublas_sgemm,1024,4,8,8,1665,1640,1654,1622,3305,3276,99.12,0.998
+cublas_sgemm,2048,4,8,8,1723,1693,1710,1688,3416,3398,99.47,1.000
+cublas_sgemm,4096,4,8,8,1711,1701,1707,1693,3412,3400,99.65,1.000

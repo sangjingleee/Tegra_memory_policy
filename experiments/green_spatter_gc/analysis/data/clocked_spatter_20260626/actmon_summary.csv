@@ -1,0 +1,12 @@
+label,samples,mc_avg_activity_p50,mc_avg_activity_p95,mc_last_activity_p50,mc_last_activity_p95,raw_log
+front_uniform_1mb_r32,49,763174.000,2992704.000,3163008.000,8426112.000,results/clocked_spatter_20260626/raw_actmon/front_uniform_1mb_r32.csv
+front_strided_1mb_r32,74,5223836.000,9214388.000,10782208.000,14112000.000,results/clocked_spatter_20260626/raw_actmon/front_strided_1mb_r32.csv
+front_scatter_1mb_r32,173,15485825.000,16629253.000,16663552.000,24203776.000,results/clocked_spatter_20260626/raw_actmon/front_scatter_1mb_r32.csv
+front_uniform_4mb_r32,49,11166471.000,15130920.000,4676224.000,9161984.000,results/clocked_spatter_20260626/raw_actmon/front_uniform_4mb_r32.csv
+front_strided_4mb_r32,75,10901968.000,17467610.000,15951104.000,27222016.000,results/clocked_spatter_20260626/raw_actmon/front_strided_4mb_r32.csv
+front_scatter_4mb_r32,314,16513382.000,18112917.000,16297216.000,24263680.000,results/clocked_spatter_20260626/raw_actmon/front_scatter_4mb_r32.csv
+back_uniform_64mb_r1,282,23259630.000,35027508.000,23934208.000,36919424.000,results/clocked_spatter_20260626/raw_actmon/back_uniform_64mb_r1.csv
+back_strided_64mb_r1,640,57728051.000,57905494.000,57818496.000,57961600.000,results/clocked_spatter_20260626/raw_actmon/back_strided_64mb_r1.csv
+back_scatter_32mb_r1,886,30164302.000,38369980.000,29510784.000,31156096.000,results/clocked_spatter_20260626/raw_actmon/back_scatter_32mb_r1.csv
+back_scatter_64mb_r1,2828,18456654.000,30630007.000,21968640.000,30722432.000,results/clocked_spatter_20260626/raw_actmon/back_scatter_64mb_r1.csv
+back_scatter_128mb_r1,5354,7521623.000,19547116.000,7314048.000,26095360.000,results/clocked_spatter_20260626/raw_actmon/back_scatter_128mb_r1.csv

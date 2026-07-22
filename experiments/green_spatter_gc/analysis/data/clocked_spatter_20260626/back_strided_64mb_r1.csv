@@ -1,0 +1,2 @@
+pattern,size_mb,iters,base_batches,dev_batches,zc_batches,dev_sms,zc_sms,dev_solo_p50_gbps,zc_solo_p50_gbps,dev_co_p50_gbps,zc_co_p50_gbps,aggregate_common_p05_gbps,aggregate_common_p50_gbps,aggregate_common_p95_gbps,solo_sum_p50_gbps,aggregate_ratio_p05_pct,aggregate_ratio_p50_pct,aggregate_ratio_p95_pct,device_preserve_p50_pct,zc_preserve_p50_pct,co_wall_p50_ms,overlap_p50_ratio
+strided,64,1,8,8,8,8,8,13.152339,13.180206,6.581425,6.581654,13.146595,13.161425,13.167360,26.332545,49.925272,49.981592,50.004128,50.039955,49.935899,81.582488,0.999907

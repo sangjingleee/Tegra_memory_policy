@@ -1,0 +1,4 @@
+buffer=512 MB  (DRAM-bound)
+stream READ peak : 177.1 GB/s
+stream COPY peak : 177.2 GB/s (rd+wr)
+spec (AGX Orin)  : 204.8 GB/s
