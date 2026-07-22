@@ -76,9 +76,8 @@ def main():
         "ps.fonttype": 42,
     })
 
-    dev_color = "#14476B"   # navy (device)
-    zc_color = "#4DB3E6"    # sky  (ZC)
-    ceil_color = "#9aa3ab"  # gray (solo-sum ceiling)
+    dev_color = "#49a9d8"   # co-run device (matches fig2_throughput_pressure)
+    zc_color = "#a8d8ef"    # co-run ZC (lighter, on top)
 
     n_cases = len(SELECTED)
     n_boards = len(BOARDS)
