@@ -88,18 +88,14 @@ def main():
 
     fig, ax = plt.subplots(figsize=(7.15, 2.9), dpi=240)
 
-    dev_handle = zc_handle = ceil_handle = None
+    dev_handle = zc_handle = None
     for bi, (board, _) in enumerate(BOARDS):
         xs = x + offsets[bi]
         dev = np.array([data[board][c]["dev_co"] for c in SELECTED])
         zc = np.array([data[board][c]["zc_co"] for c in SELECTED])
-        ceil = np.array([data[board][c]["solo_sum"] for c in SELECTED])
+        total = dev + zc
         ratio = [data[board][c]["ratio"] for c in SELECTED]
 
-        # solo-sum ceiling (behind, faint outline)
-        ceil_handle = ax.bar(xs, ceil, width=w, facecolor="none",
-                             edgecolor=ceil_color, linewidth=0.7,
-                             linestyle=(0, (2, 1)), zorder=2, label="Solo-sum ceiling")
         # co-run device + ZC
         dev_handle = ax.bar(xs, dev, width=w, color=dev_color,
                            edgecolor="white", linewidth=0.4, zorder=3,
@@ -107,9 +103,9 @@ def main():
         zc_handle = ax.bar(xs, zc, width=w, bottom=dev, color=zc_color,
                           edgecolor="white", linewidth=0.4, zorder=3,
                           label="Co-run ZC")
-        # preservation % on top of ceiling
-        for xi, ci, r in zip(xs, ceil, ratio):
-            ax.text(xi, ci + 4, f"{r:.0f}", ha="center", va="bottom",
+        # preservation % on top of the co-run bar
+        for xi, ti, r in zip(xs, total, ratio):
+            ax.text(xi, ti + 4, f"{r:.0f}", ha="center", va="bottom",
                     fontsize=5.6, color="#333333", rotation=0)
         # board initial under each sub-bar
         for xi in xs:
@@ -131,10 +127,10 @@ def main():
     ax.text(4.5, ax.get_ylim()[1] * 0.97, "pattern-dependent\ncollapse",
             ha="center", va="top", fontsize=6.6, color="#7b2d2f")
 
-    handles = [dev_handle, zc_handle, ceil_handle]
-    labels = ["Co-run device", "Co-run ZC", "Solo-sum ceiling"]
+    handles = [dev_handle, zc_handle]
+    labels = ["Co-run device", "Co-run ZC"]
     ax.legend(handles, labels, loc="upper center", bbox_to_anchor=(0.5, -0.24),
-              ncol=3, frameon=False)
+              ncol=2, frameon=False)
 
     # numbers under bars: which board is which
     ax.text(0.005, -0.24, "B=AGX  NX=Orin NX  NN=Orin Nano   (number on top = preservation %)",
