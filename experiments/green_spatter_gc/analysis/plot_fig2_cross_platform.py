@@ -76,8 +76,8 @@ def main():
         "ps.fonttype": 42,
     })
 
-    dev_color = "#49a9d8"   # co-run device (matches fig2_throughput_pressure)
-    zc_color = "#a8d8ef"    # co-run ZC (lighter, on top)
+    dev_color = "#1f5d7a"   # dark device (matches fig2_throughput_pressure solo palette)
+    zc_color = "#6f9db1"    # ZC (lighter, on top)
 
     n_cases = len(SELECTED)
     n_boards = len(BOARDS)
