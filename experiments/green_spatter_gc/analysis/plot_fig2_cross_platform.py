@@ -113,7 +113,7 @@ def main():
 
     ax.axvline(2.5, color="#7a7a7a", linewidth=0.8, linestyle="--", alpha=0.7)
     ax.text(1.0, ax.get_ylim()[1], "", ha="center")
-    ax.set_ylabel("Co-run read throughput (GB/s)")
+    ax.set_ylabel("Effective read throughput (GB/s)")
     ax.set_xticks(x)
     ax.set_xticklabels(LABELS)
     ax.tick_params(axis="x", pad=12)   # room for board initials
