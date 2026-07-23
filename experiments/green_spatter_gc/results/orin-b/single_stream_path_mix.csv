@@ -1,4 +1,4 @@
-pattern,mb_per_half,total_mb,reuse,chunks,total_bytes,case1_dev2mb_ms,case2_dev1_dev1_ms,case3_dev1_zc1_ms,case1_gbps,case2_gbps,case3_gbps,speedup_case3_vs_case2,speedup_case3_vs_case1
-uniform,1,2,1,5,10485760,0.2730,0.2962,0.2809,38.407,35.403,37.327,1.0543,0.9719
-uniform,1,2,1,5,10485760,0.2554,0.2979,0.2742,41.049,35.201,38.246,1.0865,0.9317
-uniform,1,2,1,5,10485760,0.2761,0.2967,0.2826,37.984,35.338,37.107,1.0500,0.9769
+pattern,mb_per_half,total_mb,reuse,chunks,total_bytes,case1_dev2mb_split_ms,case2_dev1_dev1_ms,case3_dev1_zc1_ms,case1_gbps,case2_gbps,case3_gbps,speedup_case3_vs_case2,speedup_case3_vs_case1
+uniform,1,2,1,5,10485760,0.2368,0.2903,0.2691,44.283,36.117,38.969,1.0790,0.8800
+uniform,1,2,1,5,10485760,0.2435,0.2952,0.2554,43.061,35.522,41.049,1.1556,0.9533
+uniform,1,2,1,5,10485760,0.2186,0.2904,0.2752,47.971,36.105,38.103,1.0554,0.7943

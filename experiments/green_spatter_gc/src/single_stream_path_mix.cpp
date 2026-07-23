@@ -132,10 +132,27 @@ int main(int argc, char** argv) {
   make_idx(idx1, m1, pat, stride);
   make_idx(idx2, m2, pat, stride);
 
-  Buf big = alloc_buf("device", m2, idx2);            // case1
+  // case1 is one 2N device allocation. To keep it structurally identical to
+  // the other two it is driven as two N-sized halves of that one allocation,
+  // so every case issues the same A,B,A,B sequence and the same launch count;
+  // the only thing that differs is where the two halves live.
+  Buf big = alloc_buf("device", m2, idx2);
   Buf d_a = alloc_buf("device", m1, idx1);            // case2/3 first half
   Buf d_b = alloc_buf("device", m1, idx1);            // case2 second half
   Buf z_b = alloc_buf("zc", m1, idx1);                // case3 second half
+
+  // The two halves reuse d_a's N-sized index array (values in [0, N)) so each
+  // half stays inside its own N region for every access pattern; big's own
+  // 2N index array would reach across the whole allocation.
+  Buf big_lo{}, big_hi{};
+  big_lo.in = big.in;
+  big_lo.idx = d_a.idx;
+  big_lo.out = big.out;
+  big_lo.m = m1;
+  big_hi.in = big.in + static_cast<size_t>(m1) * 4;
+  big_hi.idx = d_a.idx;
+  big_hi.out = big.out + static_cast<size_t>(m1) * 4;
+  big_hi.m = m1;
 
   // One stream for everything: this experiment is explicitly not about streams.
   CUstream s;
@@ -166,11 +183,6 @@ int main(int argc, char** argv) {
     return std::chrono::duration<double, std::milli>(t1 - t0).count();
   };
 
-  // case1: the single 2N buffer, CH launches.
-  auto run1 = [&]() {
-    for (int c = 0; c < CH; ++c) CK(launch(big, IT));
-    CK(cuStreamSynchronize(s));
-  };
   // case2/3: alternate the two halves as A,B,A,B,... (CH pairs = 2*CH launches).
   // Every launch is async and no sync appears inside the loop, so all 2*CH
   // kernels are queued before any of them is waited on; the single
@@ -184,8 +196,11 @@ int main(int argc, char** argv) {
       CK(cuStreamSynchronize(s));
     };
   };
-  auto run2 = run_pair(d_a, d_b);
-  auto run3 = run_pair(d_a, z_b);
+  // All three cases issue the identical A,B,A,B sequence and launch count, so
+  // the only difference left between them is where the two halves live.
+  auto run1 = run_pair(big_lo, big_hi);   // both halves in one 2N device alloc
+  auto run2 = run_pair(d_a, d_b);         // two separate N device allocs
+  auto run3 = run_pair(d_a, z_b);         // one N device + one N zero-copy
 
   for (int w = 0; w < 5; ++w) { run1(); run2(); run3(); }
 
@@ -201,7 +216,7 @@ int main(int argc, char** argv) {
   auto gbps = [&](double ms) { return bytes / (ms / 1e3) / 1e9; };
 
   std::printf("pattern,mb_per_half,total_mb,reuse,chunks,total_bytes,"
-              "case1_dev2mb_ms,case2_dev1_dev1_ms,case3_dev1_zc1_ms,"
+              "case1_dev2mb_split_ms,case2_dev1_dev1_ms,case3_dev1_zc1_ms,"
               "case1_gbps,case2_gbps,case3_gbps,"
               "speedup_case3_vs_case2,speedup_case3_vs_case1\n");
   std::printf("%s,%d,%d,%d,%d,%.0f,%.4f,%.4f,%.4f,%.3f,%.3f,%.3f,%.4f,%.4f\n",
