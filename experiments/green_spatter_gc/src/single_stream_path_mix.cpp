@@ -8,9 +8,14 @@
 //   case3_dev1_zc1    : one N device buffer + one N zero-copy buffer
 //
 // Cases 2 and 3 are structurally identical (same launch count, same chunking),
-// so their difference isolates the memory path. Chunked launches alternate
-// A,B,A,B,... on the one stream with no sync in between, so the two buffers'
-// work is in flight together rather than serialised.
+// so their difference isolates the memory path.
+//
+// Launches alternate A,B,A,B,... on the one stream with no sync in between.
+// A single stream is ordered, so the kernels still execute one after another --
+// the interleave is not concurrency. What it buys is that consecutive kernels
+// touch alternating buffers, so neither half can sit undisturbed in cache the
+// way it would under A,A,A,B,B,B, and that dropping the intermediate syncs
+// keeps host-side launch latency out of the measured interval.
 #include <cuda.h>
 
 #include <algorithm>
@@ -166,9 +171,10 @@ int main(int argc, char** argv) {
   // (cuModuleLoad + cuModuleGetFunction). This file uses no Green Context, but
   // launches the same way so its timings are comparable with the ones that do.
   //
-  // cuLaunchKernel is asynchronous: each call only enqueues onto stream `s` and
-  // returns immediately, which is what lets the A,B,A,B,... sequence below be
-  // in flight together instead of running one launch at a time.
+  // cuLaunchKernel is asynchronous in the sense that the call returns as soon as
+  // the kernel is enqueued on stream `s`. It does not make kernels overlap: a
+  // stream is ordered, so they still run one after another. Enqueuing the whole
+  // A,B,A,B,... sequence up front just keeps the host off the critical path.
   auto launch = [&](const Buf& buf, int it) {
     int m = buf.m;
     void* args[] = {(void*)&buf.in, (void*)&buf.idx, (void*)&buf.out, &m, &it};
