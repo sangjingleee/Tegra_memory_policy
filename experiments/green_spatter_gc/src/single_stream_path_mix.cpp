@@ -115,6 +115,11 @@ int main(int argc, char** argv) {
   int IT = ia(argc, argv, "iters", 1);
   int TR = ia(argc, argv, "trials", 51);
   int CH = ia(argc, argv, "chunks", 5);    // launches per buffer, interleaved
+  // Cases 2 and 3 share buffer d_a, so running them back to back in one process
+  // leaves half of case3's data warm from case2 -- a bias in zero-copy's favour.
+  // --only=1|2|3 runs a single case so each can be measured in its own process
+  // from a cold start; 0 (default) runs all three in order.
+  int ONLY = ia(argc, argv, "only", 0);
   int stride = ia(argc, argv, "stride", 17);
   std::string pat = sa(argc, argv, "pat", "uniform");
 
@@ -208,14 +213,22 @@ int main(int argc, char** argv) {
   auto run2 = run_pair(d_a, d_b);         // two separate N device allocs
   auto run3 = run_pair(d_a, z_b);         // one N device + one N zero-copy
 
-  for (int w = 0; w < 5; ++w) { run1(); run2(); run3(); }
+  auto want = [&](int c) { return ONLY == 0 || ONLY == c; };
+  for (int w = 0; w < 5; ++w) {
+    if (want(1)) run1();
+    if (want(2)) run2();
+    if (want(3)) run3();
+  }
 
   std::vector<double> v1, v2, v3;
   for (int t = 0; t < TR; ++t) {
-    v1.push_back(time_ms(run1));
-    v2.push_back(time_ms(run2));
-    v3.push_back(time_ms(run3));
+    if (want(1)) v1.push_back(time_ms(run1));
+    if (want(2)) v2.push_back(time_ms(run2));
+    if (want(3)) v3.push_back(time_ms(run3));
   }
+  if (v1.empty()) v1.push_back(0.0);
+  if (v2.empty()) v2.push_back(0.0);
+  if (v3.empty()) v3.push_back(0.0);
 
   const double bytes = static_cast<double>(m2) * 4.0 * IT * CH;  // same for all
   const double t1 = median(v1), t2 = median(v2), t3 = median(v3);
