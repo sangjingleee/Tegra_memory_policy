@@ -174,8 +174,19 @@ int main(int argc, char** argv) {
     return std::chrono::duration<double, std::milli>(t1 - t0).count();
   };
 
+  // case1 drives the 2N buffer as two N halves so it issues the same two
+  // launches as the other cases; otherwise it would get one fewer launch, worth
+  // 8-16% at these ~60 us timings, and appear faster for that reason alone.
+  Buf big_lo{}, big_hi{};
+  big_lo.in = big.in;  big_lo.idx = a.idx;  big_lo.out = big.out;  big_lo.m = m1;
+  big_hi.in = big.in + static_cast<size_t>(m1) * 4;
+  big_hi.idx = a.idx;
+  big_hi.out = big.out + static_cast<size_t>(m1) * 4;
+  big_hi.m = m1;
+
   auto run_case1 = [&]() {
-    CK(launch(p0, big, IT));
+    CK(launch(p0, big_lo, IT));
+    CK(launch(p0, big_hi, IT));
     CK(cuStreamSynchronize(p0));
   };
   auto run_case2 = [&]() {
