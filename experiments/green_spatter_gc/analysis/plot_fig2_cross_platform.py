@@ -106,10 +106,10 @@ def main():
         for xi, ti, r in zip(xs, total, ratio):
             ax.text(xi, ti + 4, f"{r:.0f}", ha="center", va="bottom",
                     fontsize=5.6, color="#333333", rotation=0)
-        # board initial under each sub-bar
+        # board name under each sub-bar
         for xi in xs:
-            ax.text(xi, -0.055, ["B", "NX", "NN"][bi], transform=ax.get_xaxis_transform(),
-                    ha="center", va="top", fontsize=5.4, color="#666666")
+            ax.text(xi, -0.055, ["AGX", "NX", "Nano"][bi], transform=ax.get_xaxis_transform(),
+                    ha="center", va="top", fontsize=5.0, color="#666666")
 
     ax.axvline(2.5, color="#7a7a7a", linewidth=0.8, linestyle="--", alpha=0.7)
     ax.text(1.0, ax.get_ylim()[1], "", ha="center")
@@ -131,8 +131,8 @@ def main():
     ax.legend(handles, labels, loc="upper center", bbox_to_anchor=(0.5, -0.24),
               ncol=2, frameon=False)
 
-    # numbers under bars: which board is which
-    ax.text(0.005, -0.24, "B=AGX  NX=Orin NX  NN=Orin Nano   (number on top = preservation %)",
+    # caption
+    ax.text(0.005, -0.24, "(number on top = preservation %)",
             transform=ax.transAxes, ha="left", va="top", fontsize=5.6, color="#666666")
 
     fig.tight_layout(rect=[0.01, 0.02, 0.99, 0.98])
