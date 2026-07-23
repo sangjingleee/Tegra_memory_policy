@@ -90,6 +90,16 @@ int main(int argc, char** argv) {
   int BATCH = ia(argc, argv, "batches", 1);
   int stride = ia(argc, argv, "stride", 17);
   std::string pat = sa(argc, argv, "pat", "uniform");
+  // Memory path per partition. Defaults reproduce the original device//zc run.
+  // Allows the device//device control needed to attribute co-run behaviour to
+  // the memory path rather than to Green Context concurrency itself.
+  std::string path1 = sa(argc, argv, "path1", "device");
+  std::string path2 = sa(argc, argv, "path2", "zc");
+
+  if ((path1 != "device" && path1 != "zc") || (path2 != "device" && path2 != "zc")) {
+    std::fprintf(stderr, "path1/path2 must be 'device' or 'zc'\n");
+    return 2;
+  }
 
   if (dev_sms_req <= 0 || zc_sms_req <= 0 || MB <= 0 || IT <= 0 || TR < 3 || BATCH <= 0) {
     std::fprintf(stderr, "SM counts, mb, iters, batches must be positive; trials must be >= 3.\n");
@@ -129,30 +139,36 @@ int main(int argc, char** argv) {
     for (int i = 0; i < m; ++i) idx[i] = static_cast<int>((static_cast<unsigned long long>(i) * 2654435761ull) % m);
   }
 
-  CUdeviceptr d_in, d_idx, d_out;
-  CK(cuMemAlloc(&d_in, bytes));
-  CK(cuMemAlloc(&d_idx, index_bytes));
-  CK(cuMemAlloc(&d_out, bytes));
-  {
-    std::vector<float> h(m, 1.0f);
-    CK(cuMemcpyHtoD(d_in, h.data(), bytes));
-    CK(cuMemcpyHtoD(d_idx, idx.data(), index_bytes));
-  }
+  // Allocate one partition's inputs on the requested path. Output always lives
+  // in device memory so only the read path differs between the two partitions.
+  auto alloc_path = [&](const std::string& kind, CUdeviceptr& in, CUdeviceptr& index,
+                        CUdeviceptr& out) {
+    if (kind == "zc") {
+      void* in_h = nullptr;
+      void* idx_h = nullptr;
+      CK(cuMemHostAlloc(&in_h, bytes, CU_MEMHOSTALLOC_PORTABLE | CU_MEMHOSTALLOC_DEVICEMAP));
+      CK(cuMemHostAlloc(&idx_h, index_bytes, CU_MEMHOSTALLOC_PORTABLE | CU_MEMHOSTALLOC_DEVICEMAP));
+      float* p = static_cast<float*>(in_h);
+      for (int i = 0; i < m; ++i) p[i] = 1.0f;
+      int* q = static_cast<int*>(idx_h);
+      for (int i = 0; i < m; ++i) q[i] = idx[i];
+      CK(cuMemHostGetDevicePointer(&in, in_h, 0));
+      CK(cuMemHostGetDevicePointer(&index, idx_h, 0));
+    } else {
+      CK(cuMemAlloc(&in, bytes));
+      CK(cuMemAlloc(&index, index_bytes));
+      std::vector<float> h(m, 1.0f);
+      CK(cuMemcpyHtoD(in, h.data(), bytes));
+      CK(cuMemcpyHtoD(index, idx.data(), index_bytes));
+    }
+    CK(cuMemAlloc(&out, bytes));
+  };
 
-  void* z_in_h = nullptr;
-  void* z_idx_h = nullptr;
+  CUdeviceptr d_in, d_idx, d_out;
+  alloc_path(path1, d_in, d_idx, d_out);
+
   CUdeviceptr z_in, z_idx, z_out;
-  CK(cuMemHostAlloc(&z_in_h, bytes, CU_MEMHOSTALLOC_PORTABLE | CU_MEMHOSTALLOC_DEVICEMAP));
-  CK(cuMemHostAlloc(&z_idx_h, index_bytes, CU_MEMHOSTALLOC_PORTABLE | CU_MEMHOSTALLOC_DEVICEMAP));
-  {
-    float* p = static_cast<float*>(z_in_h);
-    for (int i = 0; i < m; ++i) p[i] = 1.0f;
-    int* q = static_cast<int*>(z_idx_h);
-    for (int i = 0; i < m; ++i) q[i] = idx[i];
-  }
-  CK(cuMemHostGetDevicePointer(&z_in, z_in_h, 0));
-  CK(cuMemHostGetDevicePointer(&z_idx, z_idx_h, 0));
-  CK(cuMemAlloc(&z_out, bytes));
+  alloc_path(path2, z_in, z_idx, z_out);
 
   CUdevResource all, dev_grp, rem0, zc_grp, rem1;
   std::memset(&all, 0, sizeof(all));
@@ -306,9 +322,9 @@ int main(int argc, char** argv) {
   Summary wall = summarize(wall_s);
 
   const double solo_sum = dev_solo.p50 + zc_solo.p50;
-  std::printf("pattern,size_mb,iters,base_batches,dev_batches,zc_batches,dev_sms,zc_sms,dev_solo_p50_gbps,zc_solo_p50_gbps,dev_co_p50_gbps,zc_co_p50_gbps,aggregate_common_p05_gbps,aggregate_common_p50_gbps,aggregate_common_p95_gbps,solo_sum_p50_gbps,aggregate_ratio_p05_pct,aggregate_ratio_p50_pct,aggregate_ratio_p95_pct,device_preserve_p50_pct,zc_preserve_p50_pct,co_wall_p50_ms,overlap_p50_ratio\n");
-  std::printf("%s,%d,%d,%d,%d,%d,%d,%d,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f\n",
-              pat.c_str(), MB, IT, BATCH, dev_batches, zc_batches, dev_sms, zc_sms, dev_solo.p50, zc_solo.p50,
+  std::printf("pattern,path1,path2,size_mb,iters,base_batches,dev_batches,zc_batches,dev_sms,zc_sms,dev_solo_p50_gbps,zc_solo_p50_gbps,dev_co_p50_gbps,zc_co_p50_gbps,aggregate_common_p05_gbps,aggregate_common_p50_gbps,aggregate_common_p95_gbps,solo_sum_p50_gbps,aggregate_ratio_p05_pct,aggregate_ratio_p50_pct,aggregate_ratio_p95_pct,device_preserve_p50_pct,zc_preserve_p50_pct,co_wall_p50_ms,overlap_p50_ratio\n");
+  std::printf("%s,%s,%s,%d,%d,%d,%d,%d,%d,%d,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f\n",
+              pat.c_str(), path1.c_str(), path2.c_str(), MB, IT, BATCH, dev_batches, zc_batches, dev_sms, zc_sms, dev_solo.p50, zc_solo.p50,
               dev_co.p50, zc_co.p50, aggregate.p05, aggregate.p50, aggregate.p95, solo_sum,
               aggregate.p05 / solo_sum * 100.0, aggregate.p50 / solo_sum * 100.0,
               aggregate.p95 / solo_sum * 100.0, dev_co.p50 / dev_solo.p50 * 100.0,
