@@ -95,6 +95,11 @@ int main(int argc, char** argv) {
   int TR = ia(argc, argv, "trials", 31);
   int stride = ia(argc, argv, "stride", 17);
   int sms = ia(argc, argv, "sms", 8);        // per Green Context
+  // Cases 2 and 3 read the very same buffers a and b, so running them back to
+  // back leaves case3 with everything already warm from case2 -- a bias in
+  // Green Context's favour. --only=1|2|3 runs a single case so each can be
+  // timed from a cold start in its own process; 0 (default) runs all three.
+  int ONLY = ia(argc, argv, "only", 0);
   std::string pat = sa(argc, argv, "pat", "uniform");
 
   const int m1 = (MB * 1024 * 1024) / 4;     // one partition
@@ -186,14 +191,22 @@ int main(int argc, char** argv) {
     CK(cuStreamSynchronize(s1));
   };
 
-  for (int w = 0; w < 5; ++w) { run_case1(); run_case2(); run_case3(); }
+  auto want = [&](int c) { return ONLY == 0 || ONLY == c; };
+  for (int w = 0; w < 5; ++w) {
+    if (want(1)) run_case1();
+    if (want(2)) run_case2();
+    if (want(3)) run_case3();
+  }
 
   std::vector<double> t1v, t2v, t3v;
   for (int t = 0; t < TR; ++t) {
-    t1v.push_back(time_ms(run_case1));
-    t2v.push_back(time_ms(run_case2));
-    t3v.push_back(time_ms(run_case3));
+    if (want(1)) t1v.push_back(time_ms(run_case1));
+    if (want(2)) t2v.push_back(time_ms(run_case2));
+    if (want(3)) t3v.push_back(time_ms(run_case3));
   }
+  if (t1v.empty()) t1v.push_back(0.0);
+  if (t2v.empty()) t2v.push_back(0.0);
+  if (t3v.empty()) t3v.push_back(0.0);
 
   const double bytes = static_cast<double>(m2) * 4.0 * IT;  // identical for all cases
   const double c1 = median(t1v), c2 = median(t2v), c3 = median(t3v);
