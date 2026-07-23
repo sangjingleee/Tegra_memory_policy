@@ -21,6 +21,18 @@ g++ -O3 -std=c++17 src/query_sm_count.cpp \
   -I"$CUDA_HOME/include" -L"$CUDA_HOME/lib64" -lcuda \
   -o query_sm_count
 
+g++ -O3 -std=c++17 src/stream_gc_compare.cpp \
+  -I"$CUDA_HOME/include" -L"$CUDA_HOME/lib64" -lcuda \
+  -o stream_gc_compare
+
+g++ -O3 -std=c++17 src/single_stream_path_mix.cpp \
+  -I"$CUDA_HOME/include" -L"$CUDA_HOME/lib64" -lcuda \
+  -o single_stream_path_mix
+
+g++ -O3 -std=c++17 src/h2d_copy_cost.cpp \
+  -I"$CUDA_HOME/include" -L"$CUDA_HOME/lib64" -lcuda \
+  -o h2d_copy_cost
+
 if [[ -f src/cublas_gemm_split.cpp ]]; then
   g++ -O3 -std=c++17 src/cublas_gemm_split.cpp \
     -I"$CUDA_HOME/include" -L"$CUDA_HOME/lib64" -lcuda -lcublas -lcudart \
