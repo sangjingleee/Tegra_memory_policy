@@ -142,6 +142,16 @@ int main(int argc, char** argv) {
   CK(cuStreamCreate(&s, CU_STREAM_NON_BLOCKING));
 
   const int block = 256;
+  // Kernels go out through cuLaunchKernel (a plain function call), not the
+  // runtime `<<<grid, block>>>` syntax. On CUDA 12.6 Green Contexts exist only
+  // in the Driver API -- the Runtime API did not expose them until 13.1 -- so
+  // the rest of this harness is Driver-API based and loads the kernel from PTX
+  // (cuModuleLoad + cuModuleGetFunction). This file uses no Green Context, but
+  // launches the same way so its timings are comparable with the ones that do.
+  //
+  // cuLaunchKernel is asynchronous: each call only enqueues onto stream `s` and
+  // returns immediately, which is what lets the A,B,A,B,... sequence below be
+  // in flight together instead of running one launch at a time.
   auto launch = [&](const Buf& buf, int it) {
     int m = buf.m;
     void* args[] = {(void*)&buf.in, (void*)&buf.idx, (void*)&buf.out, &m, &it};
@@ -161,7 +171,10 @@ int main(int argc, char** argv) {
     for (int c = 0; c < CH; ++c) CK(launch(big, IT));
     CK(cuStreamSynchronize(s));
   };
-  // case2/3: alternate the two halves, no sync between launches.
+  // case2/3: alternate the two halves as A,B,A,B,... (CH pairs = 2*CH launches).
+  // Every launch is async and no sync appears inside the loop, so all 2*CH
+  // kernels are queued before any of them is waited on; the single
+  // cuStreamSynchronize after the loop is what the timing brackets.
   auto run_pair = [&](const Buf& A, const Buf& B) {
     return [&, A, B]() {
       for (int c = 0; c < CH; ++c) {
